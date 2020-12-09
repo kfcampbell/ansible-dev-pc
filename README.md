@@ -138,6 +138,7 @@ Most software does work on macOS, with a few exceptions noted below:
 ## Other things to make sure are taken care of
 
 - .zshrc (switch to bash?)
+  	- not pulling from @fatih's config automatically
 - themes are all light mode
   - manually changing this now
 - gopath is not consistent with my preferred folder structure
@@ -154,5 +155,10 @@ Most software does work on macOS, with a few exceptions noted below:
 
 ### other other things to do
 
-- need to `sudo apt upgrade`
-- need to restart/log off/on in order for full changes to take effect
+- `sudo apt upgrade`
+- restart/log off/on in order for full changes to take effect
+- `git config --global credential.helper store`
+ 	- `git config --global user.name`
+ 	- `git config --global user.email`
+- install draw.io
+

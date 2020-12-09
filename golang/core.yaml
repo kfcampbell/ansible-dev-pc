@@ -50,22 +50,22 @@
 
     # Common
 
-    - name: Create package/source folder
-      file:
-        path: ~/dev/go
-        state: directory
+    # - name: Create package/source folder
+    #   file:
+    #     path: ~/dev/go
+    #     state: directory
 
-    - name: Clean $GOPATH/pkg
-      become: yes
-      file:
-        path: ~/dev/go/pkg
-        state: absent
-      when: go_download_linux.changed or go_download_mac.changed
+    # - name: Clean $GOPATH/pkg
+    #   become: yes
+    #   file:
+    #     path: ~/dev/go/pkg
+    #     state: absent
+    #   when: go_download_linux.changed or go_download_mac.changed
 
-    - name: Set up environment (Common)
-      blockinfile:
-        path: ~/.bashrc
-        marker: "### {mark} Ansible managed: Go support"
-        block: |
-          export PATH=$PATH:$HOME/dev/go/bin
-          export GOPATH=$HOME/dev/go
+    # - name: Set up environment (Common)
+    #   blockinfile:
+    #     path: ~/.bashrc
+    #     marker: "### {mark} Ansible managed: Go support"
+    #     block: |
+    #       export PATH=$PATH:$HOME/dev/go/bin
+    #       export GOPATH=$HOME/dev/go
