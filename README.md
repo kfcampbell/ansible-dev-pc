@@ -162,3 +162,4 @@ Most software does work on macOS, with a few exceptions noted below:
  	- `git config --global user.email`
 - install draw.io
 - follow this guide to pair airpods: askubuntu.com/a/1063582 
+- install [xbanish](https://askubuntu.com/questions/681214/how-to-enable-keystroke-option-of-unclutter-in-unity)
