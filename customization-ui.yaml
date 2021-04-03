@@ -87,16 +87,19 @@
         value: "@as []"
 
     fonts:
-      # FiraCode
-      - https://github.com/tonsky/FiraCode/raw/master/distr/ttf/FiraCode-Regular.ttf
-      - https://github.com/tonsky/FiraCode/raw/master/distr/ttf/FiraCode-Bold.ttf
-      - https://github.com/tonsky/FiraCode/raw/master/distr/ttf/FiraCode-Medium.ttf
-      - https://github.com/tonsky/FiraCode/raw/master/distr/ttf/FiraCode-Light.ttf
       # FiraCode Nerd Font
       - https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/FiraCode/Regular/complete/Fira%20Code%20Regular%20Nerd%20Font%20Complete%20Mono.ttf
       - https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/FiraCode/Bold/complete/Fira%20Code%20Bold%20Nerd%20Font%20Complete%20Mono.ttf
-      - https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/FiraCode/Medium/complete/Fira%20Code%20Medium%20Nerd%20Font%20Complete%20Mono.ttf
-      - https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/FiraCode/Light/complete/Fira%20Code%20Light%20Nerd%20Font%20Complete%20Mono.ttf
+      # Iosevka
+      - https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/Iosevka/Regular/complete/Iosevka%20Nerd%20Font%20Complete%20Mono.ttf
+      - https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/Iosevka/Italic/complete/Iosevka%20Italic%20Nerd%20Font%20Complete%20Mono.ttf
+      - https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/Iosevka/Bold/complete/Iosevka%20Bold%20Nerd%20Font%20Complete%20Mono.ttf
+      - https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/Iosevka/Bold-Italic/complete/Iosevka%20Bold%20Italic%20Nerd%20Font%20Complete%20Mono.ttf
+      # JetBrainsMono Nerd Font
+      - https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/JetBrainsMono/Regular/complete/JetBrains%20Mono%20Regular%20Nerd%20Font%20Complete%20Mono.ttf
+      - https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/JetBrainsMono/Italic/complete/JetBrains%20Mono%20Italic%20Nerd%20Font%20Complete%20Mono.ttf
+      - https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/JetBrainsMono/Bold/complete/JetBrains%20Mono%20Bold%20Nerd%20Font%20Complete%20Mono.ttf
+      - https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/JetBrainsMono/Bold-Italic/complete/JetBrains%20Mono%20Bold%20Italic%20Nerd%20Font%20Complete%20Mono.ttf
       # UbuntuMono Nerd Font
       - https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/UbuntuMono/Regular/complete/Ubuntu%20Mono%20Nerd%20Font%20Complete%20Mono.ttf
       - https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/UbuntuMono/Regular-Italic/complete/Ubuntu%20Mono%20Italic%20Nerd%20Font%20Complete%20Mono.ttf
@@ -121,10 +124,36 @@
     is_debian: "{{ ansible_distribution == 'Debian' }}"
     is_debian_stretch: "{{ ansible_distribution_release == 'stretch' }}"
     is_mac: "{{ ansible_distribution == 'MacOSX' }}"
+    is_ubuntu: "{{ ansible_distribution == 'Ubuntu' or ansible_distribution == 'Pop!_OS' }}"
     is_ubuntu_bionic: "{{ ansible_distribution_release == 'bionic' }}"
 
   tasks:
     - set_fact: is_wsl={{ not is_mac and lookup('file', '/proc/version') is regex('(M|m)icrosoft') }}
+
+    # WSL
+
+    - name: Get Windows font path
+      shell: wslpath "$(cmd.exe /c "echo %WINDIR%" 2>/dev/null)"
+      register: windir
+      when: is_wsl
+
+    - name: Get user's Windows home path
+      shell: wslpath "$(cmd.exe /c "echo %USERPROFILE%" 2>/dev/null)"
+      register: userprofile
+      when: is_wsl
+
+    - name: Link Windows fonts into WSL
+      become: yes
+      copy:
+        dest: /etc/fonts/local.conf
+        content: |
+          <?xml version="1.0"?>
+          <!DOCTYPE fontconfig SYSTEM "fonts.dtd">
+          <fontconfig>
+              <dir>{{ windir.stdout }}/Fonts</dir>
+              <dir>{{ userprofile.stdout }}/AppData/Local/Microsoft/Windows/Fonts</dir>
+          </fontconfig>
+      when: is_wsl
 
     # Linux
 
@@ -190,23 +219,53 @@
         package: gnome-tweaks
       when: not is_mac and not is_wsl and not is_debian_stretch
 
+    - name: Enable chrome-gnome-shell
+      become: yes
+      apt:
+        package: chrome-gnome-shell
+      when: not is_mac and not is_wsl
+
     - name: Install numix Gnome theme
       become: yes
       apt:
         package: numix-gtk-theme
       when: not is_mac and not is_wsl
 
+    - name: Add paper Gnome icon theme APT package source
+      become: yes
+      apt_repository:
+        repo: ppa:snwh/ppa
+      register: apt_repository
+      when: is_ubuntu and not is_wsl
+
+    - name: Update APT package list
+      become: yes
+      apt:
+        update_cache: yes
+      when: is_ubuntu and not is_wsl and apt_repository.changed
+      register: apt_update
+      retries: 5
+      until: apt_update is success
+
+    - name: Install paper Gnome icon theme (Ubuntu)
+      become: yes
+      apt:
+        package: "{{ item }}"
+      loop:
+        - paper-icon-theme
+      when: is_ubuntu and not is_wsl
+
     - name: Download paper Gnome icon theme
       get_url:
         url: https://snwh.org/paper/download.php?owner=snwh&ppa=ppa&pkg=paper-icon-theme,18.04
         dest: /tmp/paper-icon-theme.deb
-      when: not is_mac and not is_wsl
+      when: is_debian and not is_wsl
 
-    - name: Install paper Gnome icon theme
+    - name: Install paper Gnome icon theme (Debian)
       become: yes
       apt:
         deb: /tmp/paper-icon-theme.deb
-      when: not is_mac and not is_wsl
+      when: is_debian and not is_wsl
 
     - name: Install PIP 2 (Ubuntu 18.04)
       become: yes

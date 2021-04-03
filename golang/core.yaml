@@ -3,7 +3,7 @@
   connection: local
 
   vars:
-    go_version: 1.15.5
+    go_version: 1.15.8
     is_mac: "{{ ansible_distribution == 'MacOSX' }}"
 
   tasks:
