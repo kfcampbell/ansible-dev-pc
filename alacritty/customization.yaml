@@ -32,9 +32,8 @@
 
           font:
             normal:
-              family: JetBrainsMono Nerd Font Mono
-            size: 10.0
-            use_thin_strokes: true
+              family: UbuntuMono Nerd Font Mono
+            size: 14.0
 
           draw_bold_text_with_bright_colors: true
 
