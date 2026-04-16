@@ -5,8 +5,15 @@
   tasks:
     - set_fact: is_wsl={{ lookup('file', '/proc/version') is regex('(M|m)icrosoft') }}
 
+    - name: "[Non-WSL] Get latest Obsidian release version"
+      uri:
+        url: https://api.github.com/repos/obsidianmd/obsidian-releases/releases/latest
+        return_content: yes
+      register: obsidian_latest
+      when: not is_wsl
+
     - name: "[Non-WSL] Install Obsidian"
       become: yes
       apt:
-        deb: https://github.com/obsidianmd/obsidian-releases/releases/download/v1.5.3/obsidian_1.5.3_amd64.deb
+        deb: "https://github.com/obsidianmd/obsidian-releases/releases/download/{{ obsidian_latest.json.tag_name }}/obsidian_{{ obsidian_latest.json.tag_name | replace('v', '') }}_amd64.deb"
       when: not is_wsl

@@ -72,6 +72,9 @@
         path: ~/.bashrc
         line: export RIPGREP_CONFIG_PATH=$HOME/.config/ripgrep
 
+    # NOTE: Enabling the task below will force all GitHub clones to use SSH.
+    # This is great for security but will BREAK automated installers (like pyenv)
+    # if they expect HTTPS and your SSH agent isn't accessible to Ansible.
     - name: Force git to use SSH for GitHub
       git_config:
         name: url.git@github.com:.insteadOf

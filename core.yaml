@@ -55,6 +55,7 @@
         package: "{{ item }}"
       loop:
         - apostrophe
+        - calibre
         - curl
         - dconf-editor
         - exfat-fuse
@@ -71,6 +72,12 @@
       become: yes
       apt:
         package: exfatprogs
+
+    - name: "[Non-WSL] Install Steam"
+      become: yes
+      apt:
+        package: steam
+      when: not is_wsl
 
     - name: "[Non-WSL] Install Gnome Extension Manager"
       become: yes

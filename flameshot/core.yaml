@@ -4,9 +4,11 @@
 
   tasks:
     - set_fact: is_wsl={{ lookup('file', '/proc/version') is regex('(M|m)icrosoft') }}
+    - set_fact: is_pop_24_04_plus={{ ansible_distribution == 'Pop!_OS' and (ansible_distribution_major_version | int) >= 24 }}
+    - set_fact: is_cosmic={{ is_pop_24_04_plus and not is_wsl }}
 
     - name: "[Non-WSL] Install Flameshot"
       become: yes
       apt:
         package: flameshot
-      when: not is_wsl
+      when: not is_wsl and not is_cosmic

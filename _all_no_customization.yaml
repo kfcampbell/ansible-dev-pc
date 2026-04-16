@@ -70,12 +70,13 @@
 
 # Dropbox
 - import_playbook: dropbox/core.yaml
-
-# Microsoft Edge
-- import_playbook: edge/core.yaml
-
 # Prettier version of ping w/ graphs
 - import_playbook: prettyping/core.yaml
+
+# Proton VPN
+- import_playbook: protonvpn/core.yaml
+
+# Signal
 
 # waycorner (hot corners for COSMIC)
 - import_playbook: waycorner/core.yaml

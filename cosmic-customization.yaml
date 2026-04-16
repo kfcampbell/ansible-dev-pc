@@ -60,3 +60,25 @@
           )
         mode: 0644
       when: is_cosmic
+
+    - name: Ensure COSMIC shortcuts configuration folder exists
+      file:
+        path: "~/.config/cosmic/com.system76.CosmicSettings.Shortcuts/v1"
+        state: directory
+        mode: 0700
+      when: is_cosmic
+
+    - name: Add CopyQ shortcut (COSMIC)
+      copy:
+        dest: "~/.config/cosmic/com.system76.CosmicSettings.Shortcuts/v1/custom"
+        content: |
+          (
+              custom: {
+                  "copyq show": (
+                      modifiers: ["Super", "Control"],
+                      key: "c",
+                  ),
+              }
+          )
+        mode: 0644
+      when: is_cosmic

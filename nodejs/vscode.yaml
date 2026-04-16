@@ -12,4 +12,4 @@
         - esbenp.prettier-vscode
         - wallabyjs.quokka-vscode
         - Anthropic.claude-code
-        - google.gemini-cli-companion
+        - google.gemini-cli-vscode-ide-companion

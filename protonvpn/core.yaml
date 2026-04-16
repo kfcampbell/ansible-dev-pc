@@ -1,0 +1,34 @@
+- name: Proton VPN
+  hosts: 127.0.0.1
+  connection: local
+
+  tasks:
+    - set_fact: is_wsl={{ lookup('file', '/proc/version') is regex('(M|m)icrosoft') }}
+
+    - name: "[Non-WSL] Download Proton VPN repository package"
+      get_url:
+        url: https://repo.protonvpn.com/debian/dists/stable/main/binary-all/protonvpn-stable-release_1.0.8_all.deb
+        dest: /tmp/protonvpn-stable-release_1.0.8_all.deb
+        mode: 0644
+      when: not is_wsl
+
+    - name: "[Non-WSL] Install Proton VPN repository"
+      become: yes
+      apt:
+        deb: /tmp/protonvpn-stable-release_1.0.8_all.deb
+      when: not is_wsl
+
+    - name: "[Non-WSL] Update APT package list"
+      become: yes
+      apt:
+        update_cache: yes
+      when: not is_wsl
+      register: apt_update
+      retries: 5
+      until: apt_update is success
+
+    - name: "[Non-WSL] Install Proton VPN"
+      become: yes
+      apt:
+        package: proton-vpn-gnome-desktop
+      when: not is_wsl

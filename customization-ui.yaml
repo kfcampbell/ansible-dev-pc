@@ -44,7 +44,7 @@
       - key: /org/gnome/settings-daemon/plugins/xsettings/antialiasing
         value: "'grayscale'"
       - key: /org/gnome/shell/favorite-apps
-        value: "['alacritty.desktop', 'firefox_firefox.desktop', 'microsoft-edge.desktop', 'slack.desktop', 'code.desktop', 'spotify.desktop', 'obsidian.desktop', 'org.gnome.Apostrophe.desktop', 'zoom.desktop', 'discord_discord.desktop', 'signal-desktop.desktop', 'dropbox.desktop', 'copyq.desktop']"
+        value: "['alacritty.desktop', 'firefox_firefox.desktop', 'slack.desktop', 'code.desktop', 'spotify.desktop', 'obsidian.desktop', 'org.gnome.Apostrophe.desktop', 'protonvpn-app.desktop', 'zoom.desktop', 'discord_discord.desktop', 'signal-desktop.desktop', 'dropbox.desktop', 'copyq.desktop']"
       - key: /org/gnome/shell/extensions/desktop-icons/show-home
         value: "false"
       - key: /org/gnome/shell/extensions/desktop-icons/show-trash
@@ -337,7 +337,7 @@
     - name: "[Non-WSL, Gnome v42] Create missing Gnome extension list"
       set_fact:
         missing_extensions: "{{ missing_extensions + [item.item] }}"
-      when: not is_wsl and is_ubu_22_04 and not item.stat.exists and not is_cosmic
+      when: not is_wsl and is_ubu_22_04 and not is_cosmic and item.stat is defined and not item.stat.exists
       with_items: "{{ gnome_extensions_v42_installed.results }}"
 
     - name: "[Non-WSL, Gnome v46] Check if extension is installed"
@@ -350,7 +350,7 @@
     - name: "[Non-WSL, Gnome v46] Create missing Gnome extension list"
       set_fact:
         missing_extensions: "{{ missing_extensions + [item.item] }}"
-      when: not is_wsl and is_ubu_24_04 and not item.stat.exists and not is_cosmic
+      when: not is_wsl and is_ubu_24_04 and not is_cosmic and item.stat is defined and not item.stat.exists
       with_items: "{{ gnome_extensions_v46_installed.results }}"
 
     - name: "[Non-WSL] Download Gnome extensions"
