@@ -17,10 +17,12 @@
 
     dconf_config:
       # Themes
+      - key: /org/gnome/desktop/interface/color-scheme
+        value: "'prefer-dark'"
       - key: /org/gnome/desktop/interface/cursor-theme
         value: "'Paper'"
       - key: /org/gnome/desktop/interface/gtk-theme
-        value: "'Numix'"
+        value: "'Numix-Dark'"
       - key: /org/gnome/desktop/interface/icon-theme
         value: "'Paper'"
       - key: /org/gnome/terminal/legacy/profiles:/:b1dcc9dd-5262-4d8d-a863-c897e6d979b9/use-theme-colors
