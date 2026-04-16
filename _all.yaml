@@ -15,6 +15,7 @@
 
 - import_playbook: customization-text.yaml
 - import_playbook: customization-ui.yaml
+- import_playbook: cosmic-customization.yaml
 
 ##### Use Starship for its customized prompt
 

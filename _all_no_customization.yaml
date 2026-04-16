@@ -24,6 +24,9 @@
 # Broot
 - import_playbook: broot/core.yaml
 
+# CopyQ
+- import_playbook: copyq/core.yaml
+
 # Docker
 - import_playbook: docker/core.yaml
 

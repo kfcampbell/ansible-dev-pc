@@ -1,0 +1,34 @@
+- name: CopyQ
+  hosts: 127.0.0.1
+  connection: local
+
+  tasks:
+    - set_fact: is_wsl={{ lookup('file', '/proc/version') is regex('(M|m)icrosoft') }}
+
+    - name: "[Non-WSL] Install CopyQ"
+      become: yes
+      apt:
+        package: copyq
+      when: not is_wsl
+
+    - name: "[Non-WSL] Ensure autostart directory exists"
+      file:
+        path: ~/.config/autostart
+        state: directory
+      when: not is_wsl
+
+    - name: "[Non-WSL] Enable CopyQ on startup"
+      copy:
+        dest: ~/.config/autostart/copyq.desktop
+        content: |
+          [Desktop Entry]
+          Type=Application
+          Exec=copyq
+          Hidden=false
+          NoDisplay=false
+          X-GNOME-Autostart-enabled=true
+          Name[en_US]=CopyQ
+          Name=CopyQ
+          Comment[en_US]=Clipboard Manager
+          Comment=Clipboard Manager
+      when: not is_wsl

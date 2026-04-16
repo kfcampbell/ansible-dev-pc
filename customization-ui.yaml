@@ -7,7 +7,7 @@
       'Pop!_OS': 'Ubuntu'
     distribution: "{{ distribution_fallback[ansible_distribution] | default(ansible_distribution) }}"
     distribution_release_snwh_fallback:
-      'noble': 'focal'
+      'noble': 'jammy'
       'jammy': 'focal'
     distribution_release_snwh: "{{ distribution_release_snwh_fallback[ansible_distribution_release] | default(ansible_distribution_release) }}"
     is_ubu_22_04: "{{ distribution == 'Ubuntu' and (ansible_distribution_major_version | int) == 22 }}"
@@ -44,7 +44,7 @@
       - key: /org/gnome/settings-daemon/plugins/xsettings/antialiasing
         value: "'grayscale'"
       - key: /org/gnome/shell/favorite-apps
-        value: "['alacritty.desktop', 'firefox_firefox.desktop', 'microsoft-edge.desktop', 'slack.desktop', 'code.desktop', 'spotify.desktop', 'obsidian.desktop', 'zoom.desktop', 'discord_discord.desktop', 'signal-desktop.desktop', 'dropbox.desktop']"
+        value: "['alacritty.desktop', 'firefox_firefox.desktop', 'microsoft-edge.desktop', 'slack.desktop', 'code.desktop', 'spotify.desktop', 'obsidian.desktop', 'zoom.desktop', 'discord_discord.desktop', 'signal-desktop.desktop', 'dropbox.desktop', 'copyq.desktop']"
       - key: /org/gnome/shell/extensions/desktop-icons/show-home
         value: "false"
       - key: /org/gnome/shell/extensions/desktop-icons/show-trash

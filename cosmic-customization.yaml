@@ -1,0 +1,39 @@
+- name: COSMIC OS customization
+  hosts: 127.0.0.1
+  connection: local
+
+  vars:
+    xkb_config_path: "~/.config/cosmic/com.system76.CosmicComp/v1/xkb_config"
+    is_wsl: "{{ lookup('file', '/proc/version') is regex('(M|m)icrosoft') }}"
+    is_pop_24_04_plus: "{{ ansible_distribution == 'Pop!_OS' and (ansible_distribution_major_version | int) >= 24 }}"
+    is_cosmic: "{{ is_pop_24_04_plus and not is_wsl }}"
+
+  tasks:
+    - name: Ensure COSMIC configuration folder exists
+      file:
+        path: "{{ xkb_config_path | dirname }}"
+        state: directory
+        mode: 0700
+      when: is_cosmic
+
+    - name: Get current xkb_config content
+      stat:
+        path: "{{ xkb_config_path }}"
+      register: xkb_config_stat
+      when: is_cosmic
+
+    - name: Update xkb_config with Alt/Ctrl swap
+      copy:
+        dest: "{{ xkb_config_path }}"
+        content: |
+          (
+              rules: "",
+              model: "",
+              layout: "us",
+              variant: "",
+              options: Some("lv3:ralt_switch,compose:rctrl,caps:swapescape,ctrl:swap_lalt_lctl,ctrl:swap_ralt_rctl"),
+              repeat_delay: 600,
+              repeat_rate: 25,
+          )
+        mode: 0644
+      when: is_cosmic
