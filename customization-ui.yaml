@@ -12,6 +12,8 @@
     distribution_release_snwh: "{{ distribution_release_snwh_fallback[ansible_distribution_release] | default(ansible_distribution_release) }}"
     is_ubu_22_04: "{{ distribution == 'Ubuntu' and (ansible_distribution_major_version | int) == 22 }}"
     is_ubu_24_04: "{{ distribution == 'Ubuntu' and (ansible_distribution_major_version | int) == 24 }}"
+    is_pop_24_04_plus: "{{ ansible_distribution == 'Pop!_OS' and (ansible_distribution_major_version | int) >= 24 }}"
+    is_cosmic: "{{ is_pop_24_04_plus and not is_wsl }}"
 
     dconf_config:
       # Themes
@@ -42,7 +44,7 @@
       - key: /org/gnome/settings-daemon/plugins/xsettings/antialiasing
         value: "'grayscale'"
       - key: /org/gnome/shell/favorite-apps
-        value: "['alacritty.desktop', 'firefox_firefox.desktop', 'microsoft-edge.desktop', 'slack.desktop', 'virt-manager.desktop', 'code.desktop', 'org.remmina.Remmina.desktop']"
+        value: "['alacritty.desktop', 'firefox_firefox.desktop', 'microsoft-edge.desktop', 'slack.desktop', 'code.desktop', 'spotify.desktop', 'obsidian.desktop', 'zoom.desktop', 'discord_discord.desktop', 'signal-desktop.desktop', 'dropbox.desktop']"
       - key: /org/gnome/shell/extensions/desktop-icons/show-home
         value: "false"
       - key: /org/gnome/shell/extensions/desktop-icons/show-trash
@@ -323,19 +325,19 @@
         path: /tmp/gnome-extensions
         state: directory
         mode: 0755
-      when: not is_wsl
+      when: not is_wsl and not is_cosmic
 
     - name: "[Non-WSL, Gnome v42] Check if extension is installed"
       stat:
         path: ~/.local/share/gnome-shell/extensions/{{ item.name }}
       register: gnome_extensions_v42_installed
       loop: "{{ gnome_extensions_v42 }}"
-      when: not is_wsl and is_ubu_22_04
+      when: not is_wsl and is_ubu_22_04 and not is_cosmic
 
     - name: "[Non-WSL, Gnome v42] Create missing Gnome extension list"
       set_fact:
         missing_extensions: "{{ missing_extensions + [item.item] }}"
-      when: not is_wsl and is_ubu_22_04 and not item.stat.exists
+      when: not is_wsl and is_ubu_22_04 and not item.stat.exists and not is_cosmic
       with_items: "{{ gnome_extensions_v42_installed.results }}"
 
     - name: "[Non-WSL, Gnome v46] Check if extension is installed"
@@ -343,12 +345,12 @@
         path: ~/.local/share/gnome-shell/extensions/{{ item.name }}
       register: gnome_extensions_v46_installed
       loop: "{{ gnome_extensions_v46 }}"
-      when: not is_wsl and is_ubu_24_04
+      when: not is_wsl and is_ubu_24_04 and not is_cosmic
 
     - name: "[Non-WSL, Gnome v46] Create missing Gnome extension list"
       set_fact:
         missing_extensions: "{{ missing_extensions + [item.item] }}"
-      when: not is_wsl and is_ubu_24_04 and not item.stat.exists
+      when: not is_wsl and is_ubu_24_04 and not item.stat.exists and not is_cosmic
       with_items: "{{ gnome_extensions_v46_installed.results }}"
 
     - name: "[Non-WSL] Download Gnome extensions"
@@ -357,12 +359,12 @@
         dest: /tmp/gnome-extensions
         mode: 0644
       loop: "{{ missing_extensions }}"
-      when: not is_wsl
+      when: not is_wsl and not is_cosmic
 
     - name: "[Non-WSL] Install Gnome extension"
       command: gnome-extensions install /tmp/gnome-extensions/{{ item.file }}
       loop: "{{ missing_extensions }}"
-      when: not is_wsl
+      when: not is_wsl and not is_cosmic
 
     - name: "[Non-WSL] Install Fonts (via APT)"
       become: yes
@@ -401,25 +403,25 @@
         url: https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xd320d0c30b02e64c5b2bb2743766223989993a70
         dest: /etc/apt/trusted.gpg.d/ppa_snwh_ppa_{{ distribution_release_snwh }}.asc
         mode: 0644
-      when: not is_wsl
+      when: not is_wsl and not is_cosmic
 
     - name: "[Non-WSL] Install Gnome Tweaks"
       become: yes
       apt:
         package: gnome-tweaks
-      when: not is_wsl
+      when: not is_wsl and not is_cosmic
 
     - name: "[Non-WSL] Enable chrome-gnome-shell"
       become: yes
       apt:
         package: chrome-gnome-shell
-      when: not is_wsl
+      when: not is_wsl and not is_cosmic
 
     - name: "[Non-WSL] Install numix Gnome theme"
       become: yes
       apt:
         package: numix-gtk-theme
-      when: not is_wsl
+      when: not is_wsl and not is_cosmic
 
     - name: "[Non-WSL] Add paper Gnome icon theme APT package source"
       become: yes
@@ -428,13 +430,13 @@
         filename: ppa_snwh_ppa_{{ distribution_release_snwh }}
         update_cache: no
       register: apt_repository
-      when: not is_wsl
+      when: not is_wsl and not is_cosmic
 
     - name: "[Non-WSL] Update APT package list"
       become: yes
       apt:
         update_cache: yes
-      when: not is_wsl and apt_repository.changed
+      when: not is_wsl and apt_repository.changed and not is_cosmic
       register: apt_update
       retries: 5
       until: apt_update is success
@@ -445,7 +447,7 @@
         package: "{{ item }}"
       loop:
         - paper-icon-theme
-      when: not is_wsl
+      when: not is_wsl and not is_cosmic
 
     - name: "[Non-WSL] Install PIP 3"
       become: yes
@@ -470,4 +472,4 @@
         key: "{{ item.key }}"
         value: "{{ item.value }}"
       loop: "{{ dconf_config }}"
-      when: not is_wsl
+      when: not is_wsl and not is_cosmic

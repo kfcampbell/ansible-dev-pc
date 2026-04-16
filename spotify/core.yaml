@@ -1,0 +1,37 @@
+- name: Spotify
+  hosts: 127.0.0.1
+  connection: local
+
+  tasks:
+    - set_fact: is_wsl={{ lookup('file', '/proc/version') is regex('(M|m)icrosoft') }}
+
+    - name: "[Non-WSL] Add Spotify APT package key"
+      become: yes
+      shell:
+        cmd: curl -sS https://download.spotify.com/debian/pubkey_5384CE82BA52C83A.asc | gpg --dearmor --yes -o /etc/apt/trusted.gpg.d/spotify.gpg
+        creates: /etc/apt/trusted.gpg.d/spotify.gpg
+      when: not is_wsl
+
+    - name: "[Non-WSL] Add Spotify APT package repository"
+      become: yes
+      apt_repository:
+        repo: deb https://repository.spotify.com stable non-free
+        filename: spotify
+        update_cache: no
+      register: apt_repository
+      when: not is_wsl
+
+    - name: "[Non-WSL] Update APT package list"
+      become: yes
+      apt:
+        update_cache: yes
+      when: apt_repository.changed
+      register: apt_update
+      retries: 5
+      until: apt_update is success
+
+    - name: "[Non-WSL] Install Spotify Client"
+      become: yes
+      apt:
+        package: spotify-client
+      when: not is_wsl

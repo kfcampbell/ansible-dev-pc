@@ -1,0 +1,12 @@
+- name: Dropbox
+  hosts: 127.0.0.1
+  connection: local
+
+  tasks:
+    - set_fact: is_wsl={{ lookup('file', '/proc/version') is regex('(M|m)icrosoft') }}
+
+    - name: "[Non-WSL] Install Dropbox (Nautilus integration)"
+      become: yes
+      apt:
+        package: nautilus-dropbox
+      when: not is_wsl
