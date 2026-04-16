@@ -11,3 +11,5 @@
         - dbaeumer.vscode-eslint
         - esbenp.prettier-vscode
         - wallabyjs.quokka-vscode
+        - Anthropic.claude-code
+        - google.gemini-cli-companion

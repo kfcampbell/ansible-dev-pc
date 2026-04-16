@@ -54,6 +54,7 @@
       apt:
         package: "{{ item }}"
       loop:
+        - apostrophe
         - curl
         - dconf-editor
         - exfat-fuse

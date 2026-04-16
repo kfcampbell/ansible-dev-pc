@@ -1,0 +1,51 @@
+- name: waycorner
+  hosts: 127.0.0.1
+  connection: local
+
+  tasks:
+    - set_fact: is_wsl={{ lookup('file', '/proc/version') is regex('(M|m)icrosoft') }}
+    - set_fact: is_cosmic="{{ ansible_distribution == 'Pop!_OS' and (ansible_distribution_major_version | int) >= 24 and not is_wsl }}"
+
+    - name: "[COSMIC] Install waycorner via cargo"
+      shell:
+        cmd: cargo install waycorner --locked
+        creates: ~/.cargo/bin/waycorner
+      when: is_cosmic
+
+    - name: "[COSMIC] Ensure waycorner config directory exists"
+      file:
+        path: ~/.config/waycorner
+        state: directory
+      when: is_cosmic
+
+    - name: "[COSMIC] Configure waycorner for workspaces"
+      copy:
+        dest: ~/.config/waycorner/config.toml
+        content: |
+          [main-monitor]
+          enter_command = [ "cosmic-workspaces" ]
+          locations = [ "top_left" ]
+          size = 10
+          margin = 20
+          timeout_ms = 0
+      when: is_cosmic
+
+    - name: "[COSMIC] Ensure autostart directory exists"
+      file:
+        path: ~/.config/autostart
+        state: directory
+      when: is_cosmic
+
+    - name: "[COSMIC] Enable waycorner on startup"
+      copy:
+        dest: ~/.config/autostart/waycorner.desktop
+        content: |
+          [Desktop Entry]
+          Type=Application
+          Exec={{ ansible_env.HOME }}/.cargo/bin/waycorner
+          Hidden=false
+          NoDisplay=false
+          X-GNOME-Autostart-enabled=true
+          Name=waycorner
+          Comment=Hot Corners for Wayland
+      when: is_cosmic

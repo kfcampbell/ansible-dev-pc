@@ -15,3 +15,8 @@
     - name: Use NodeJS LTS by default
       command: bash -ic "nvm use --lts"
       when: nvm_ls.failed
+
+    - name: Install AI tools (Claude Code and Gemini CLI)
+      command: bash -ic "npm install -g @anthropic-ai/claude-code @google/gemini-cli"
+      register: npm_install
+      changed_when: "'added' in npm_install.stdout or 'updated' in npm_install.stdout"

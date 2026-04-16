@@ -77,6 +77,9 @@
 # Prettier version of ping w/ graphs
 - import_playbook: prettyping/core.yaml
 
+# waycorner (hot corners for COSMIC)
+- import_playbook: waycorner/core.yaml
+
 # Obsidian
 - import_playbook: obsidian/core.yaml
 
