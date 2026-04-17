@@ -72,13 +72,70 @@
       copy:
         dest: "~/.config/cosmic/com.system76.CosmicSettings.Shortcuts/v1/custom"
         content: |
-          (
-              custom: {
-                  "copyq show": (
-                      modifiers: ["Super", "Control"],
-                      key: "c",
-                  ),
-              }
-          )
+          {
+              "copyq": (
+                  name: "CopyQ",
+                  description: "Show CopyQ main window",
+                  command: "/usr/bin/copyq show",
+                  bindings: ["<Control><Alt>c"],
+              ),
+          }
         mode: 0644
       when: is_cosmic
+
+    - name: Install Papirus icon theme
+      become: yes
+      apt:
+        package: papirus-icon-theme
+      when: is_cosmic
+
+    - name: Ensure COSMIC Tk configuration folder exists
+      file:
+        path: "~/.config/cosmic/com.system76.CosmicTk/v1"
+        state: directory
+        mode: 0700
+      when: is_cosmic
+
+    - name: Set COSMIC icon theme to Papirus-Dark
+      copy:
+        dest: "~/.config/cosmic/com.system76.CosmicTk/v1/icon_theme"
+        content: '"Papirus-Dark"'
+        mode: 0644
+      when: is_cosmic
+
+    # Slack and Discord ship .desktop files that set Icon= to an absolute PNG,
+    # bypassing icon-theme lookup. The dock then scales one bitmap and the
+    # result is chunky. Drop user-local overrides that point Icon= at the
+    # theme name so Papirus's SVG is used instead.
+    - name: Ensure local applications directory exists
+      file:
+        path: "~/.local/share/applications"
+        state: directory
+        mode: 0755
+      when: is_cosmic
+
+    - name: Check for system Slack .desktop
+      stat:
+        path: /usr/share/applications/slack.desktop
+      register: slack_desktop
+      when: is_cosmic
+
+    - name: Override Slack .desktop with theme icon name
+      copy:
+        dest: "~/.local/share/applications/slack.desktop"
+        content: "{{ lookup('file', '/usr/share/applications/slack.desktop') | regex_replace('(?m)^Icon=.*$', 'Icon=slack') }}"
+        mode: 0644
+      when: is_cosmic and slack_desktop.stat.exists
+
+    - name: Check for system Discord .desktop
+      stat:
+        path: /var/lib/snapd/desktop/applications/discord_discord.desktop
+      register: discord_desktop
+      when: is_cosmic
+
+    - name: Override Discord .desktop with theme icon name
+      copy:
+        dest: "~/.local/share/applications/discord_discord.desktop"
+        content: "{{ lookup('file', '/var/lib/snapd/desktop/applications/discord_discord.desktop') | regex_replace('(?m)^Icon=.*$', 'Icon=discord') }}"
+        mode: 0644
+      when: is_cosmic and discord_desktop.stat.exists

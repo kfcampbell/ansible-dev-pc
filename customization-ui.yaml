@@ -24,7 +24,7 @@
       - key: /org/gnome/desktop/interface/gtk-theme
         value: "'Numix-Dark'"
       - key: /org/gnome/desktop/interface/icon-theme
-        value: "'Paper'"
+        value: "'Papirus-Dark'"
       - key: /org/gnome/terminal/legacy/profiles:/:b1dcc9dd-5262-4d8d-a863-c897e6d979b9/use-theme-colors
         value: "false"
       # Fonts
@@ -474,4 +474,4 @@
         key: "{{ item.key }}"
         value: "{{ item.value }}"
       loop: "{{ dconf_config }}"
-      when: not is_wsl and not is_cosmic
+      when: not is_wsl
